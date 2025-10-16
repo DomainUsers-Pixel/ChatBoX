@@ -4,14 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ChatBox v2 — Firebase</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Firebase v9 (modular) CDN -->
-  <script type="module" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- ✅ Load Firebase SDKs (Compat build) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div class="app" id="app" aria-live="polite">
+  <div class="app" id="app">
     <div class="sidebar">
       <div class="brand">
         <div class="logo">CB</div>
@@ -23,12 +24,12 @@
 
       <div class="search">
         <input id="searchInput" placeholder="Search rooms or IDs" />
-        <button class="pill-btn" id="newRoomBtn" title="Create new room">+ New</button>
+        <button class="pill-btn" id="newRoomBtn">+ New</button>
       </div>
 
-      <div class="list" id="roomsList" role="list" aria-label="Rooms"></div>
+      <div class="list" id="roomsList"></div>
 
-      <div style="margin-top:auto;display:flex;gap:var(--btn-gap);align-items:center;justify-content:space-between">
+      <div style="margin-top:auto;display:flex;gap:8px;align-items:center;justify-content:space-between">
         <div class="small">Logged as <span id="meTag" class="muted">(not signed)</span></div>
         <div style="display:flex;gap:8px">
           <button class="pill-btn" id="btnProfile">Profile</button>
@@ -41,20 +42,20 @@
       <div class="chat-head">
         <div>
           <div id="roomTitle" style="font-weight:700">Welcome</div>
-          <div class="small muted" id="roomSub">Select or create a room to start</div>
+          <div class="small muted" id="roomSub">Select or create a room</div>
         </div>
         <div class="row">
           <div class="pill small">Online: <span id="onlineCount">0</span></div>
-          <div class="pill small pill-btn" id="themeToggle" title="Toggle theme">Theme</div>
+          <div class="pill small pill-btn" id="themeToggle">Theme</div>
         </div>
       </div>
 
-      <div class="messages" id="messages" tabindex="0" aria-live="polite"></div>
+      <div class="messages" id="messages"></div>
 
       <div class="composer">
         <input id="fileAttach" type="file" accept="image/*" style="display:none" />
-        <textarea id="messageInput" placeholder="Type a message... (enter to send)"></textarea>
-        <button class="btn" id="attachBtn" title="Attach image">📎</button>
+        <textarea id="messageInput" placeholder="Type a message..."></textarea>
+        <button class="btn" id="attachBtn">📎</button>
         <button class="btn" id="sendBtn">Send</button>
       </div>
     </div>
@@ -67,89 +68,41 @@
           <div class="small muted" id="profileNameNote">Tap Profile to edit</div>
         </div>
       </div>
-
       <div>
         <div class="small muted">Room info</div>
         <div id="roomInfo" class="muted-note">No room selected</div>
-        <div style="margin-top:8px" id="roomActions"></div>
-      </div>
-
-      <div style="margin-top:auto">
-        <div class="small muted">App controls</div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="pill-btn" id="exportBtn">Export</button>
-          <button class="pill-btn" id="importBtn">Import</button>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- AUTH / MODALS -->
+  <!-- ✅ Auth Modal -->
   <div class="overlay" id="authOverlay" style="display:flex">
     <div class="panel" id="authPanel">
       <h2 id="panelTitle">Welcome to ChatBox</h2>
-      <div class="muted-note">Create an account with email (Firebase Auth)</div>
+      <div class="muted-note">Create an account or login</div>
 
-      <div id="authArea" style="margin-top:12px">
-        <div class="field"><label>Email</label><input id="emailInput" type="email" placeholder="you@example.com" /></div>
-        <div class="field"><label>Password</label><input id="pwInput" type="password" placeholder="choose a password" /></div>
-        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end"><button class="btn" id="signupBtn">Sign up</button></div>
-        <div style="margin-top:10px;display:flex;gap:8px;justify-content:space-between;align-items:center">
+      <div id="authArea">
+        <div class="field"><label>Email</label><input id="emailInput" type="email" /></div>
+        <div class="field"><label>Password</label><input id="pwInput" type="password" /></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <button class="btn" id="signupBtn">Sign up</button>
           <button class="pill-btn" id="gotoLogin">Already have account</button>
-          <div class="muted-note">Tip: open multiple tabs to simulate multiple users.</div>
         </div>
       </div>
 
-      <div id="loginArea" style="display:none;margin-top:12px">
+      <div id="loginArea" style="display:none">
         <div class="field"><label>Email</label><input id="loginEmail" type="email" /></div>
         <div class="field"><label>Password</label><input id="loginPw" type="password" /></div>
-        <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="loginBtn">Login</button></div>
-        <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-start"><button class="pill-btn" id="gotoSignup">Create new</button></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Create / Edit Room Modal -->
-  <div class="overlay" id="roomModal" style="display:none">
-    <div class="panel" role="dialog" aria-modal="true">
-      <h3 id="roomModalTitle">Create a room</h3>
-      <div class="field"><label>Room name</label><input id="roomName" placeholder="e.g. Football chat" /></div>
-      <div class="field"><label>Custom room id (optional, letters/numbers/-)</label><input id="roomCustomId" placeholder="leave empty to auto-generate" /></div>
-      <div class="field"><label>Description</label><textarea id="roomDesc" rows="3" placeholder="Short description"></textarea></div>
-      <div class="field"><label>Room password (optional)</label><input id="roomPw" placeholder="optional" /></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="pill-btn" id="cancelRoom">Cancel</button>
-        <button class="btn" id="saveRoom">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Fancy Private Room Modal -->
-  <div class="overlay" id="privateModal" style="display:none">
-    <div class="panel private-modal" role="dialog" aria-modal="true" aria-labelledby="privateTitle">
-      <div class="modal-header">
-        <div class="lock-badge">🔒</div>
-        <div>
-          <div id="privateTitle" class="fancy-title">Private Room Access</div>
-          <div class="small muted" id="privateSubtitle">Enter password to unlock the room</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <button class="btn" id="loginBtn">Login</button>
+          <button class="pill-btn" id="gotoSignup">Create new</button>
         </div>
       </div>
-
-      <div class="field"><label>Room</label><input id="privateRoomName" readonly /></div>
-      <div class="field"><label>Room ID</label><input id="privateRoomId" readonly /></div>
-      <div class="field"><label>Password</label><input id="privateRoomPw" type="password" placeholder="Room password" /></div>
-
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
-        <button class="pill-btn" id="privateCancel">Cancel</button>
-        <button class="btn" id="privateUnlock">Unlock Room</button>
-      </div>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="toast" class="toast"></div>
 
-  <!-- App logic -->
-  <script type="module" src="app.js"></script>
+  <script src="app.js"></script>
 </body>
-  </html>
+</html>
