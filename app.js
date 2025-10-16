@@ -1,6 +1,9 @@
 // app.js — Full Chat + Rooms integration (Firestore)
 // Make sure index.html loads firebase compat scripts (we already did)
 
+// App.js Alert (Java Working)
+alert("✅ app.js loaded");
+console.log("✅ app.js loaded");
 // Firebase config (your config)
 const firebaseConfig = {
   apiKey: "AIzaSyBOQTDhTkZqCGyr2UIig5v1cWHu3Up_C_s",
